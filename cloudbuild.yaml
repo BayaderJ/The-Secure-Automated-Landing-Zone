@@ -1,0 +1,23 @@
+steps:
+  #1. Init Terraform
+  - name: 'hashicorp/terraform:1.6'
+    args: ['init']
+    dir: 'environments/development'
+
+  #2. Plan what will change
+  - name: 'hashicorp/terraform:1.6'
+    args: ['plan', '-var=project_id=$PROJECT_ID', '-var=db_password=$$DB_PASSWORD']
+    dir: 'environments/development'
+    secretEnv: ['DB_PASSWORD']
+
+  #3. Apply changes
+  - name: 'hashicorp/terraform:1.6'
+    args: ['apply', '-auto-approve', '-var=project_id=$PROJECT_ID', '-var=db_password=$$DB_PASSWORD']
+    dir: 'environments/development'
+    secretEnv: ['DB_PASSWORD']
+
+# Pull the db password from Secret Manager during the build
+availableSecrets:
+  secretManager:
+    - versionName: projects/$PROJECT_ID/secrets/db-password/versions/latest
+      env: 'DB_PASSWORD'
