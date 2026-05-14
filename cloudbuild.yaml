@@ -22,5 +22,7 @@ availableSecrets:
     - versionName: projects/$PROJECT_ID/secrets/db-password/versions/latest
       env: 'DB_PASSWORD'
 
+# options:
+#   default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
 options:
-  default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
+  logging: CLOUD_LOGGING_ONLY
