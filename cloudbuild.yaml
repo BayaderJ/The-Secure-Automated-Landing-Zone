@@ -1,18 +1,48 @@
 steps:
-  #1. Init Terraform
+  # State must live in GCS: each Cloud Build worker is a fresh filesystem; without a remote
+  # backend, every run starts with empty state and tries to recreate fixed-name resources.
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        set -euo pipefail
+        BUCKET="$PROJECT_ID-terraform-state-lz"
+        if ! gsutil ls -b "gs://$${BUCKET}" &>/dev/null; then
+          gsutil mb -p "$PROJECT_ID" -l us-central1 "gs://$${BUCKET}"
+        fi
+
   - name: 'hashicorp/terraform:1.6'
-    args: ['init']
+    entrypoint: '/bin/sh'
+    args:
+      - '-c'
+      - |
+        set -eu
+        terraform init -input=false \
+          -backend-config="bucket=$PROJECT_ID-terraform-state-lz" \
+          -backend-config="prefix=terraform/development"
     dir: 'environments/development'
 
-  #2. Plan what will change
   - name: 'hashicorp/terraform:1.6'
-    args: ['plan', '-var=project_id=$PROJECT_ID', '-var=db_password=$$DB_PASSWORD']
+    args:
+      [
+        'plan',
+        '-input=false',
+        '-var=project_id=$PROJECT_ID',
+        '-var=db_password=$$DB_PASSWORD',
+      ]
     dir: 'environments/development'
     secretEnv: ['DB_PASSWORD']
 
-  #3. Apply changes
   - name: 'hashicorp/terraform:1.6'
-    args: ['apply', '-auto-approve', '-var=project_id=$PROJECT_ID', '-var=db_password=$$DB_PASSWORD']
+    args:
+      [
+        'apply',
+        '-input=false',
+        '-auto-approve',
+        '-var=project_id=$PROJECT_ID',
+        '-var=db_password=$$DB_PASSWORD',
+      ]
     dir: 'environments/development'
     secretEnv: ['DB_PASSWORD']
 
