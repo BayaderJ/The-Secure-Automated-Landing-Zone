@@ -1,6 +1,5 @@
 steps:
-  # State must live in GCS: each Cloud Build worker is a fresh filesystem; without a remote
-  # backend, every run starts with empty state and tries to recreate fixed-name resources.
+  #1. Create the GCS bucket if it doesn't exist
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
     entrypoint: 'bash'
     args:
@@ -12,6 +11,7 @@ steps:
           gsutil mb -p "$PROJECT_ID" -l us-central1 "gs://$${BUCKET}"
         fi
 
+  #2. Initialize Terraform and dynamically inject the GCS bucket config
   - name: 'hashicorp/terraform:1.6'
     entrypoint: '/bin/sh'
     args:
@@ -23,17 +23,20 @@ steps:
           -backend-config="prefix=terraform/development"
     dir: 'environments/development'
 
+  #3. Run Terraform Plan
   - name: 'hashicorp/terraform:1.6'
     args:
       [
         'plan',
         '-input=false',
         '-var=project_id=$PROJECT_ID',
+        '-var=zone=$LOCATION',
         '-var=db_password=$$DB_PASSWORD',
       ]
     dir: 'environments/development'
     secretEnv: ['DB_PASSWORD']
 
+  #4. Run Terraform Apply
   - name: 'hashicorp/terraform:1.6'
     args:
       [
@@ -41,18 +44,17 @@ steps:
         '-input=false',
         '-auto-approve',
         '-var=project_id=$PROJECT_ID',
+        '-var=zone=$LOCATION',
         '-var=db_password=$$DB_PASSWORD',
       ]
     dir: 'environments/development'
     secretEnv: ['DB_PASSWORD']
 
-# Pull the db password from Secret Manager during the build
+# Pulling the database password securely from Secret Manager during the build
 availableSecrets:
   secretManager:
     - versionName: projects/$PROJECT_ID/secrets/db-password/versions/latest
       env: 'DB_PASSWORD'
 
-# options:
-#   default_logs_bucket_behavior: REGIONAL_USER_OWNED_BUCKET
 options:
   logging: CLOUD_LOGGING_ONLY

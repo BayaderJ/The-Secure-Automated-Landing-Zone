@@ -1,20 +1,4 @@
-terraform {
-  backend "gcs" {}
 
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "google" {
-  project = var.project_id
-  region  = var.region
-}
-
-# Call each module
 module "networking" {
   source     = "../../modules/networking"
   project_id = var.project_id
@@ -28,11 +12,11 @@ module "secrets" {
 }
 
 module "database" {
-  source        = "../../modules/database"
-  project_id    = var.project_id
-  region        = var.region
-  db_password   = var.db_password
-  vpc_self_link = module.networking.vpc_self_link
+  source         = "../../modules/database"
+  project_id     = var.project_id
+  region         = var.region
+  db_password    = var.db_password
+  vpc_self_link  = module.networking.vpc_self_link
   vpc_connection = module.networking.vpc_connection 
 }
 
