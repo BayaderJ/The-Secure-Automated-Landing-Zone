@@ -52,9 +52,10 @@ resource "google_compute_global_address" "private_ip_range" {
   project       = var.project_id
 }
 
-# Creating the actual peering between your VPC and Google's network
+# peering between my VPC and Google's network
 resource "google_service_networking_connection" "private_vpc_connection" {
   network                 = google_compute_network.vpc.id
   service                 = "servicenetworking.googleapis.com"
   reserved_peering_ranges = [google_compute_global_address.private_ip_range.name]
+  project                 = var.project_id
 }

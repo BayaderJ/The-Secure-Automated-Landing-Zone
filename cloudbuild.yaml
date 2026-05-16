@@ -31,7 +31,6 @@ steps:
         '-input=false',
         '-lock=false',
         '-var=project_id=$PROJECT_ID',
-        '-var=zone=$LOCATION',
         '-var=db_password=$$DB_PASSWORD',
       ]
     dir: 'environments/development'
@@ -46,7 +45,6 @@ steps:
         '-auto-approve',
         '-lock=false',
         '-var=project_id=$PROJECT_ID',
-        '-var=zone=$LOCATION',
         '-var=db_password=$$DB_PASSWORD',
       ]
     dir: 'environments/development'
