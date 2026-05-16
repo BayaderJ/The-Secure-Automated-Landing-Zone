@@ -29,6 +29,7 @@ steps:
       [
         'plan',
         '-input=false',
+        '-lock=false',
         '-var=project_id=$PROJECT_ID',
         '-var=zone=$LOCATION',
         '-var=db_password=$$DB_PASSWORD',
@@ -43,6 +44,7 @@ steps:
         'apply',
         '-input=false',
         '-auto-approve',
+        '-lock=false',
         '-var=project_id=$PROJECT_ID',
         '-var=zone=$LOCATION',
         '-var=db_password=$$DB_PASSWORD',
