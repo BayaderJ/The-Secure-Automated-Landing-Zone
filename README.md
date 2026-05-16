@@ -3,8 +3,6 @@
 ## Project Overview
 This project was created as a requirement for the **Google Cloud Platform Bootcamp hosted by Globant**.
 
----
-
 ## Repository Architecture
 
 Below is the visual layout of the project codebase:
