@@ -8,13 +8,13 @@ This project was created as a requirement for the **Google Cloud Platform Bootca
 Below is the visual layout of the project codebase:
 
 ![alt text](image.png)
-### What is Modular Infrastructure?
-Instead of writing hundreds of lines of code into a single, unorganized file, this project uses a **modular design**. By splitting the components into dedicated folders under `modules/`, the infrastructure becomes completely reusable, highly readable, and isolated. This allow to scale the infrastructure cleanly—meaning we could spin up an identical testing or production environment later without changing our core code logic.
+### Why Modular Infrastructure?
+Instead of writing hundreds of lines of code into a single, unorganized file, this project uses a **modular design**. By splitting the components into dedicated folders under `modules/`, the infrastructure becomes completely reusable, highly readable, and scalable. 
 
 ### Folder Breakdown & Contents:
 
-* **`environments/development/`**: This is the core environment tracking folder. It functions as the infrastructure's orchestrator, housing your environment-specific files (`variables.tf`, `providers.tf`). This directory is what **calls all of our modules** and passes parameters between them to initiate the build.
-* **`modules/networking/`**: Builds the foundation. It provisions a custom VPC, isolated private-only subnets (with private Google API access enabled), and maps out the crucial Private Network Peering Connection.
+* **`environments/development/`**: This is the core environment tracking folder. It functions as the infrastructure's orchestrator, housing the environment-specific files (`variables.tf`, `providers.tf`). This directory is what **calls all of our modules** and passes parameters between them to initiate the build.
+* **`modules/networking/`**:  It provisions a custom VPC, isolated private-only subnets (with private Google API access enabled), and maps out the crucial Private Network Peering Connection.
 * **`modules/secrets/`**: Handles security. It provisions GCP Secret Manager to securely store and reference the database password version, keeping raw sensitive strings completely out of source control.
 * **`modules/compute/`**: Deploys the application tier. It handles the deployment of an internal `e2-micro` Virtual Machine instance nested inside the private subnet.
 * **`modules/database/`**: Deploys the data tier. It creates a private `db-f1-micro` Cloud SQL instance that communicates completely hidden from the open internet.
@@ -40,6 +40,6 @@ The modules work together by passing outputs and variables between each other to
 
 The entire landing zone utilizes a complete workflow managed by Google Cloud Build:
 
-* **The Trigger:** Any code change or infrastructure adjustment pushed to the `main` branch on GitHub automatically signals a webhook that starts a Cloud Build execution.
-* **The Identity:** The pipeline runs under the project's **Compute Engine default service account**, which has been granted explicit IAM permissions (`Compute Admin`, `Cloud SQL Admin`, `Secret Manager Secret Accessor`, and `Service Networking Admin`) to execute code on behalf of the project safely.
+* **The Trigger:** Any code change or infrastructure adjustment pushed to the `main` branch on GitHub automatically starts a Cloud Build execution.
+
 * **The State Storage:** The initialization step automatically checks for and manages an isolated GCS backend bucket (`$PROJECT_ID-terraform-state-lz`) to securely store and maintain the global Terraform state file locks.
